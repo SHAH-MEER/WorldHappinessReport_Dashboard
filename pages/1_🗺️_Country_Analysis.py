@@ -82,7 +82,7 @@ st.markdown("""
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("happiness_by_country_cleaned.csv")
+    df = pd.read_csv("data/processed/happiness_by_country_cleaned.csv")
     df.columns = [col.replace('Explained by: ', '') for col in df.columns]
     return df
 

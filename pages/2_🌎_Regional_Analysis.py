@@ -452,7 +452,7 @@ def main():
             st.dataframe(region_counts, use_container_width=True)
         
         # Create tabs for different analyses
-        tab1, tab2, tab3 = st.tabs(["Regional Overview", "Region Comparison", "Region Details"])
+        tab1, tab2, tab3, tab4 = st.tabs(["Regional Overview", "Region Comparison", "Region Details", "Region Countries"])
         
         with tab1:
             st.subheader("Regional Happiness Overview")
@@ -539,6 +539,7 @@ def main():
                         coloraxis_colorbar_title='Happiness Score'
                     )
                     st.plotly_chart(fig_map, use_container_width=True)
+                    
                 except Exception as e:
                     st.warning(f"Could not create map visualization: {str(e)}")
                     st.info("Some country names may not be recognized by the mapping library.")
@@ -546,6 +547,65 @@ def main():
                     # Show countries as a list instead
                     countries_list = ', '.join(sorted(region_data['country'].tolist()))
                     st.text_area("Countries in this region:", countries_list, height=100)
+
+        with tab4:
+            st.subheader("🌍 Region Countries")
+            
+            # Region selector for countries table
+            selected_region_countries = st.selectbox(
+                "Select Region to View Countries",
+                sorted(df['region'].unique()),
+                key="region_countries_selector"
+            )
+            
+            st.write(f"Complete list of countries in {selected_region_countries} with their happiness metrics")
+            
+            # Filter data for selected region
+            region_countries_data = df[df['region'] == selected_region_countries]
+            
+            if not region_countries_data.empty:
+                # Prepare the data for display
+                countries_df = region_countries_data[['country', 'happiness', 'gdp', 'social_support', 'life_expectancy']].copy()
+                countries_df = countries_df.sort_values('happiness', ascending=False)
+                
+                # Rename columns for better display
+                countries_df.columns = ['Country', 'Happiness Score', 'GDP per Capita', 'Social Support', 'Life Expectancy']
+                
+                # Round numeric columns to 3 decimal places
+                numeric_cols = ['Happiness Score', 'GDP per Capita', 'Social Support', 'Life Expectancy']
+                countries_df[numeric_cols] = countries_df[numeric_cols].round(3)
+                
+                # Add rank column
+                countries_df.insert(0, 'Rank', range(1, len(countries_df) + 1))
+                
+                # Display the table with enhanced styling
+                st.markdown("""
+                    <style>
+                    .region-table {
+                        font-size: 14px;
+                        margin-top: 1rem;
+                    }
+                    </style>
+                """, unsafe_allow_html=True)
+                
+                st.dataframe(
+                    countries_df,
+                    use_container_width=True,
+                    height=400,
+                    hide_index=True
+                )
+                
+                # Add download button below the table
+                csv = countries_df.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label=f"📥 Download {selected_region_countries} Countries Data",
+                    data=csv,
+                    file_name=f"{selected_region_countries.replace(' ', '_')}_countries.csv",
+                    mime="text/csv",
+                    help=f"Download the complete list of countries in {selected_region_countries} with their metrics"
+                )
+            else:
+                st.info(f"No countries found in {selected_region_countries}")
 
     except Exception as e:
         display_error(f"An unexpected error occurred: {str(e)}")

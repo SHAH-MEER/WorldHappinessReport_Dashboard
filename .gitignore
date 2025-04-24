@@ -1,23 +1,117 @@
-.idea
-.idea/
-*.iml
-*.ipr
-*.iws
-*.DS_Store
-.venv
+# Python
 __pycache__/
 *.py[cod]
-*.pyo
-*.pyd
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.env
+.venv
+env/
+venv/
+ENV/
+.venv/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+*.sublime-workspace
+*.sublime-project
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Project specific
+*.log
+*.xlsx
+*.xls
 *.db
 *.sqlite3
+*.csv
+*.txt
+
+# Keep specific data files
+!data/raw/happiness_by_country.csv
+!data/raw/happy.csv
+!data/processed/happiness_by_country_cleaned.csv
+!data/processed/latest_happiness_cleaned.csv
+!data/processed/output.csv
+!data/processed/happiness_summary_detailed.txt
+!requirements.txt
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
 *.egg-info/
+.installed.cfg
 *.egg
-*.log
-*.coverage
-*.mypy_cache/
-*.pytest_cache/
-*.hypothesis/
-*.tox/
-*.coverage.*
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
 *.cover
+.hypothesis/
+.pytest_cache/
+
+# Streamlit
+.streamlit/
+
+# Local development settings
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Environment variables
+.env
+.env.*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Note: Current column names in data files are:
+# - 'Country name' (not 'country_name')
+# - 'Year' (not 'year')
+# Please update your Streamlit app code accordingly. 

@@ -581,26 +581,56 @@ def main():
             help="Random seed for reproducibility"
         )
         
-        # Train button
-        train_button = st.button("Train Model")
+        # Train button for when user makes changes
+        train_button = st.button("Retrain Model with New Settings")
 
     # Main content area
     with st.container():
-        # Train model when button is clicked
-        if train_button:
-            with st.spinner(f"Training {model_type}..."):
+        # Initialize default model if not already trained
+        if not hasattr(st.session_state, 'model'):
+            with st.spinner("Training initial Random Forest model..."):
                 try:
-                    # Get feature matrix and target
+                    # Get feature matrix and target for default RF model
+                    X = df[features].copy()  # Use all features by default
+                    y = df[target].copy()
+                    
+                    # Train default RF model
+                    model_results = train_model(X, y, "rf", 0.2, 42)  # Default settings
+                    
+                    if model_results:
+                        model, metrics, feature_importances, X_train, X_test, y_train, y_test, y_pred = model_results
+                        
+                        # Store model and data in session state
+                        st.session_state.model = model
+                        st.session_state.feature_names = features
+                        st.session_state.metrics = metrics
+                        st.session_state.y_test = y_test
+                        st.session_state.y_pred = y_pred
+                        st.session_state.feature_importances = feature_importances
+                        
+                        display_success("Initial Random Forest model trained successfully!")
+                    else:
+                        display_error("Initial model training failed.")
+                        
+                except Exception as e:
+                    display_error(f"Error training initial model: {str(e)}")
+                    st.error(traceback.format_exc())
+        
+        # Retrain model when button is clicked with new settings
+        if train_button:
+            with st.spinner(f"Training {model_type} with new settings..."):
+                try:
+                    # Get feature matrix and target with selected features
                     X = df[selected_features].copy()
                     y = df[target].copy()
                     
-                    # Train model
+                    # Train model with new settings
                     model_results = train_model(X, y, model_code, test_size, int(random_state))
                     
                     if model_results:
                         model, metrics, feature_importances, X_train, X_test, y_train, y_test, y_pred = model_results
                         
-                        # Store model and feature names in session state for prediction
+                        # Update session state with new model and data
                         st.session_state.model = model
                         st.session_state.feature_names = selected_features
                         st.session_state.metrics = metrics
@@ -608,8 +638,7 @@ def main():
                         st.session_state.y_pred = y_pred
                         st.session_state.feature_importances = feature_importances
                         
-                        # Display success message
-                        display_success(f"{model_type} trained successfully!")
+                        display_success(f"{model_type} trained successfully with new settings!")
                     else:
                         display_error("Model training failed.")
                         
@@ -810,11 +839,6 @@ def main():
                 display_error(f"Error making prediction: {str(e)}")
                 st.error(traceback.format_exc())
                 return  
-    # Footer
-    st.markdown("""
-    <div style='background-color: #000000; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;'>  
-        <p style='text-align: center; color: #2c3e50#f8f9fa;'>© 2023 Predictive Analytics App</p>
-    </div>
-    """, unsafe_allow_html=True)
+
 if __name__ == "__main__":
     main()

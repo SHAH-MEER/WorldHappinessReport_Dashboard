@@ -1,0 +1,31 @@
+Dataset Summary
+==============
+
+Total countries: 159
+Year range: 2011-2024
+Average happiness score: 5.4529
+Maximum happiness score: 7.856
+Minimum happiness score: 2.021
+
+Data Quality Metrics
+===================
+
+Missing values per column:
+upperwhisker: 31 missing values
+lowerwhisker: 31 missing values
+Explained by: Log GDP per capita: 31 missing values
+Explained by: Social support: 31 missing values
+Explained by: Healthy life expectancy: 31 missing values
+Explained by: Freedom to make life choices: 31 missing values
+Explained by: Generosity: 31 missing values
+Explained by: Perceptions of corruption: 31 missing values
+Dystopia + residual: 31 missing values
+Happiness Change: 159 missing values
+5-Year Change: 795 missing values
+
+Countries with most improved happiness (last 5 years):
+Viet Nam: 0.999
+Serbia: 0.828
+Armenia: 0.817
+India: 0.816
+China: 0.797

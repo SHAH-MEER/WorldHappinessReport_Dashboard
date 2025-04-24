@@ -5,8 +5,6 @@ import plotly.graph_objects as go
 import pandas as pd
 import seaborn as sns
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import train_test_split
 import os
 import traceback
 
@@ -46,6 +44,50 @@ st.markdown("""
         border-radius: 0.5rem;
         margin: 1rem 0;
     }
+    .mapbox-token-warning {
+        display: none !important;
+    }
+    .content-card {
+        background-color: #ffffff;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        margin: 1rem 0;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease-in-out;
+    }
+    .content-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .content-card h3, .content-card h4 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    .content-card p {
+        color: #4a4a4a;
+        margin: 0.5rem 0;
+        line-height: 1.5;
+    }
+    .content-card ul {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+        list-style-type: none;
+    }
+    .content-card li {
+        color: #4a4a4a;
+        margin: 0.5rem 0;
+        position: relative;
+    }
+    .content-card li:before {
+        content: "•";
+        color: #3498db;
+        font-weight: bold;
+        position: absolute;
+        left: -1rem;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -53,15 +95,21 @@ st.markdown("""
 @st.cache_data
 def load_data():
     try:
-        if not os.path.exists("happy.csv"):
-            st.error("Data file 'happy.csv' not found. Please ensure the file exists in the application directory.")
+        if not os.path.exists("data/processed/happiness_by_country_cleaned.csv"):
+            st.error("Data file 'happiness_by_country_cleaned.csv' not found. Please ensure the file exists in the application directory.")
             return None
         
-        df = pd.read_csv("happy.csv")
+        df = pd.read_csv("data/processed/happiness_by_country_cleaned.csv")
+        
+        # Rename columns to remove "Explained by: " prefix
+        df.columns = [col.replace('Explained by: ', '') for col in df.columns]
         
         # Validate required columns exist
-        required_columns = ['country', 'happiness', 'gdp', 'social_support', 'life_expectancy', 
-                           'freedom_to_make_life_choices', 'generosity', 'corruption']
+        required_columns = ['Country name', 'Ladder score', 'Log GDP per capita', 
+                          'Social support', 'Healthy life expectancy', 
+                          'Freedom to make life choices', 'Generosity', 
+                          'Perceptions of corruption']
+        
         missing_columns = [col for col in required_columns if col not in df.columns]
         
         if missing_columns:
@@ -69,15 +117,16 @@ def load_data():
             return None
             
         # Ensure data types are correct
-        numeric_cols = ['happiness', 'gdp', 'social_support', 'life_expectancy', 
-                       'freedom_to_make_life_choices', 'generosity', 'corruption']
+        numeric_cols = ['Ladder score', 'Log GDP per capita', 
+                       'Social support', 'Healthy life expectancy', 
+                       'Freedom to make life choices', 'Generosity', 
+                       'Perceptions of corruption']
         
         for col in numeric_cols:
             df[col] = pd.to_numeric(df[col], errors='coerce')
         
         # Check for and handle missing values
         if df.isnull().any().any():
-            st.warning(f"Dataset contains {df.isnull().sum().sum()} missing values. They will be handled appropriately.")
             # Fill missing values with medians for numeric columns
             for col in numeric_cols:
                 df[col] = df[col].fillna(df[col].median())
@@ -88,45 +137,241 @@ def load_data():
         st.error(traceback.format_exc())
         return None
 
+@st.cache_data
+def load_latest_data():
+    return pd.read_csv("data/processed/latest_happiness_cleaned.csv")
+
+@st.cache_data
+def load_summary():
+    with open("data/processed/happiness_summary_detailed.txt", "r") as f:
+        return f.read()
+
 # Main application content
 def main():
     # Title and description with enhanced styling
     st.title("🌍 World Happiness Index")
     st.markdown("""
-    <div style='background-color: #f8f9fa; padding: 1rem; border-radius: 0.5rem; margin: 1rem 0;'>
-        <h3 style='color: #2c3e50;'>Welcome to the World Happiness Analysis Dashboard</h3>
+    <div class="content-card">
+        <h3 style='margin-top: 0;'>Welcome to the World Happiness Analysis Dashboard</h3>
         <p>Explore global happiness trends, analyze contributing factors, and discover insights about well-being across nations.</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Load data
+    # Load data first for all visualizations
     df = load_data()
     if df is None:
         st.error("Could not load or process the dataset. Please check the errors above.")
         return
 
-    numeric_columns = df.select_dtypes(include=[np.number]).columns
+    # Global Metrics Dashboard
+    st.subheader("🌐 Global Happiness Overview")
     
+    # Create metrics with sparklines
+    col1, col2, col3 = st.columns(3)
+    
+    # Calculate metrics
+    current_year = df['Year'].max()
+    prev_year = current_year - 1
+    current_avg = df[df['Year'] == current_year]['Ladder score'].mean()
+    prev_avg = df[df['Year'] == prev_year]['Ladder score'].mean()
+    
+    with col1:
+        st.metric(
+            "Global Happiness",
+            f"{current_avg:.2f}",
+            f"{((current_avg - prev_avg) / prev_avg) * 100:.1f}%",
+            help="Average global happiness score and year-over-year change"
+        )
+
+    with col2:
+        happiest_country = df[df['Year'] == current_year].nlargest(1, 'Ladder score')['Country name'].iloc[0]
+        happiest_score = df[df['Year'] == current_year].nlargest(1, 'Ladder score')['Ladder score'].iloc[0]
+        st.metric(
+            "Happiest Country",
+            happiest_country,
+            f"Score: {happiest_score:.2f}"
+        )
+
+    with col3:
+        volatility = df.groupby('Country name')['Happiness Change'].std().mean()
+        st.metric(
+            "Global Stability",
+            f"{volatility:.3f}",
+            "Lower is more stable",
+            help="Average happiness score volatility across countries"
+        )
+
+    # Happiness Highlights Section
+    st.markdown("### 🎯 Happiness Highlights")
+    
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        # Most Improved Countries
+        most_improved = df.groupby('Country name')['Happiness Change'].mean().nlargest(5)
+        
+        fig_improved = go.Figure()
+        fig_improved.add_trace(go.Bar(
+            x=most_improved.index,
+            y=most_improved.values,
+            marker_color='#2ecc71',
+            text=[f"+{val:.2f}" for val in most_improved.values],
+            textposition='auto',
+        ))
+        
+        fig_improved.update_layout(
+            title="Most Improved Countries",
+            xaxis_title="Country",
+            yaxis_title="Average Annual Improvement",
+            showlegend=False,
+            height=300
+        )
+        
+        st.plotly_chart(fig_improved, use_container_width=True)
+    
+    with col2:
+        # Key Statistics
+        st.markdown("""
+        <div class="content-card">
+            <h4 style='margin-top: 0;'>Quick Facts</h4>
+            <ul>
+                <li>Data spans {years} years</li>
+                <li>{countries} countries analyzed</li>
+                <li>Average happiness: {avg:.2f}</li>
+                <li>Score range: {min:.1f} - {max:.1f}</li>
+            </ul>
+        </div>
+        """.format(
+            years=df['Year'].nunique(),
+            countries=df['Country name'].nunique(),
+            avg=df['Ladder score'].mean(),
+            min=df['Ladder score'].min(),
+            max=df['Ladder score'].max()
+        ), unsafe_allow_html=True)
+
+    # Interactive World Map
+    st.markdown("### 🗺️ Global Happiness Distribution")
+    
+    # Year selector for map
+    selected_year = st.slider(
+        "Select Year",
+        min_value=int(df['Year'].min()),
+        max_value=int(df['Year'].max()),
+        value=int(df['Year'].max()),
+        help="Drag to see happiness distribution for different years"
+    )
+    
+    # Filter data for selected year
+    year_data = df[df['Year'] == selected_year]
+    
+    # Create choropleth map
+    fig_map = px.choropleth(
+        year_data,
+        locations='Country name',
+        locationmode='country names',
+        color='Ladder score',
+        hover_name='Country name',
+        hover_data={
+            'Ladder score': ':.2f',
+            'Log GDP per capita': ':.3f',
+            'Happiness Change': ':.3f'
+        },
+        color_continuous_scale='Viridis',
+        title=f'World Happiness Scores ({selected_year})'
+    )
+    
+    fig_map.update_layout(
+        height=600,
+        geo=dict(
+            showframe=False,
+            showcoastlines=True,
+            projection_type='equirectangular'
+        )
+    )
+    
+    st.plotly_chart(fig_map, use_container_width=True)
+    
+    # Add map legend and instructions
+    with st.expander("🔍 Map Instructions"):
+        st.markdown("""
+        <div class="content-card">
+            <ul>
+                <li>Hover over countries to see detailed happiness metrics</li>
+                <li>Click and drag to pan across the map</li>
+                <li>Scroll to zoom in/out</li>
+                <li>Double-click to reset the view</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Factor Analysis Section
+    st.markdown("### 📊 Happiness Factors Analysis")
+    
+    # Get factor correlations
+    factor_cols = ['Ladder score', 'Log GDP per capita', 
+                  'Social support', 'Healthy life expectancy',
+                  'Freedom to make life choices', 'Generosity',
+                  'Perceptions of corruption']
+    
+    corr_matrix = df[factor_cols].corr().round(2)
+    
+    # Factor Impact Analysis
+    factor_importance = pd.Series({
+        col: abs(corr_matrix['Ladder score'][col])
+        for col in corr_matrix.columns if col != 'Ladder score'
+    }).sort_values(ascending=True)
+    
+    fig_impact = go.Figure()
+    fig_impact.add_trace(go.Bar(
+        y=factor_importance.index,
+        x=factor_importance.values,
+        orientation='h',
+        marker_color='#3498db',
+        text=[f"{val:.2f}" for val in factor_importance.values],
+        textposition='auto',
+    ))
+    
+    fig_impact.update_layout(
+        title="Factor Impact on Happiness",
+        xaxis_title="Correlation Strength",
+        yaxis_title="",
+        height=400,
+        showlegend=False,
+        xaxis=dict(range=[0, 1]),
+        margin=dict(l=0, r=10, t=30, b=0),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
+    
+    st.plotly_chart(fig_impact, use_container_width=True)
+    
+    # Add explanation
+    st.info("""
+    **Understanding Factor Impact:**
+    - This analysis shows how strongly each factor correlates with overall happiness scores
+    - Higher values indicate stronger relationships with happiness
+    - Values range from 0 (no correlation) to 1 (perfect correlation)
+    """)
+
     # Enhanced sidebar with better organization
     with st.sidebar:
-        st.image("https://img.icons8.com/clouds/100/000000/happiness.png", width=100)
         st.sidebar.header("📊 Dashboard Controls")
         
         # Add country selection
         selected_country = st.multiselect(
             "Select Countries to Compare",
-            df['country'].unique(),
+            df['Country name'].unique(),
             help="Choose one or more countries to analyze"
         )
         
         # Add factor selection
         factor_options = [
-            ('GDP', 'gdp'),
-            ('Social Support', 'social_support'),
-            ('Life Expectancy', 'life_expectancy'),
-            ('Freedom', 'freedom_to_make_life_choices'),
-            ('Generosity', 'generosity'),
-            ('Corruption', 'corruption')
+            ('GDP', 'Log GDP per capita'),
+            ('Social Support', 'Social support'),
+            ('Life Expectancy', 'Healthy life expectancy'),
+            ('Freedom', 'Freedom to make life choices'),
+            ('Generosity', 'Generosity'),
+            ('Corruption', 'Perceptions of corruption')
         ]
         selected_factors = st.multiselect(
             "Select Factors to Analyze",
@@ -152,63 +397,16 @@ def main():
 
     # Main content with improved layout
     try:
-        col1, col2, col3 = st.columns([1,1,1])
-
-        with col1:
-            st.metric(
-                "Global Average Happiness",
-                f"{df['happiness'].mean():.2f}",
-                f"{df['happiness'].std():.2f} σ"
-            )
-
-        with col2:
-            st.metric(
-                "Happiest Country",
-                df.loc[df['happiness'].idxmax(), 'country'],
-                f"Score: {df['happiness'].max():.2f}"
-            )
-
-        with col3:
-            st.metric(
-                "Total Countries",
-                len(df['country'].unique()),
-                "Analyzed"
-            )
-
-        # World map visualization with error handling
-        st.subheader("🗺️ Global Happiness Distribution")
-        try:
-            fig_map = px.choropleth(
-                df,
-                locations='country',
-                locationmode='country names',
-                color='happiness',
-                hover_name='country',
-                color_continuous_scale='Magma',
-                range_color=[df['happiness'].min(), df['happiness'].max()],
-                scope='world',
-                labels={'happiness': 'Happiness Score'},
-                title='World Happiness Map'
-            )
-            fig_map.update_layout(
-                margin=dict(l=0, r=0, t=30, b=0),
-                coloraxis_colorbar_title='Happiness Score'
-            )
-            st.plotly_chart(fig_map, use_container_width=True)
-        except Exception as e:
-            st.error(f"Error creating map visualization: {str(e)}")
-            st.info("Try selecting different countries or check if your countries have valid names for mapping.")
-
-        # Main layout with columns
         col1, col2 = st.columns([2, 1])
-        filtered_df = df[df['country'].isin(selected_country)] if selected_country else df.copy()
+        filtered_df = df[df['Country name'].isin(selected_country)] if selected_country else df.copy()
         
         with col1:
             st.subheader("📊 Interactive Scatter Plot")
+            numeric_columns = df.select_dtypes(include=[np.number]).columns
             if len(numeric_columns) >= 2:
                 try:
-                    x_axis = st.selectbox("X-axis", numeric_columns, index=1)  # Default to gdp
-                    y_axis = st.selectbox("Y-axis", numeric_columns, index=0)  # Default to happiness
+                    x_axis = st.selectbox("X-axis", factor_cols, index=1)  # Default to GDP
+                    y_axis = st.selectbox("Y-axis", factor_cols, index=0)  # Default to Ladder score
                     
                     # Create scatter plot with error handling
                     if filtered_df.empty:
@@ -217,10 +415,10 @@ def main():
                         fig_scatter = px.scatter(filtered_df, 
                                             x=x_axis, 
                                             y=y_axis,
-                                            color='country',
-                                            size='happiness',
-                                            hover_data=['country'],
-                                            title=f"{x_axis.replace('_', ' ').title()} vs {y_axis.replace('_', ' ').title()}")
+                                            color='Country name',
+                                            size='Ladder score',
+                                            hover_data=['Country name'],
+                                            title=f"{x_axis} vs {y_axis}")
                         st.plotly_chart(fig_scatter, use_container_width=True)
                 except Exception as e:
                     st.error(f"Error creating scatter plot: {str(e)}")
@@ -234,54 +432,38 @@ def main():
             else:
                 st.dataframe(filtered_df.describe().round(2))
 
-        # Correlation heatmap
-        st.subheader("🔥 Correlation Heatmap")
-        try:
-            corr = df[numeric_columns].corr().round(2)
-            fig_heatmap = px.imshow(
-                corr,
-                labels=dict(color="Correlation"),
-                color_continuous_scale='RdBu_r',
-                text_auto=True
-            )
-            fig_heatmap.update_layout(title="Correlation Between Happiness Factors")
-            st.plotly_chart(fig_heatmap, use_container_width=True)
-        except Exception as e:
-            st.error(f"Error creating correlation heatmap: {str(e)}")
-
         # Top 10 happiest countries
         st.subheader("🏆 Top 10 Happiest Countries")
         try:
-            top_10 = df.nlargest(10, 'happiness')
+            top_10 = df[df['Year'] == df['Year'].max()].nlargest(10, 'Ladder score')
             fig_bar = px.bar(
                 top_10,
-                x='country',
-                y='happiness',
-                color='happiness',
+                x='Country name',
+                y='Ladder score',
+                color='Ladder score',
                 title="Top 10 Happiest Countries",
-                labels={"country": "Country", "happiness": "Happiness Score"}
+                labels={"Country name": "Country", "Ladder score": "Happiness Score"}
             )
             fig_bar.update_layout(xaxis_tickangle=-45)
             st.plotly_chart(fig_bar, use_container_width=True)
         except Exception as e:
             st.error(f"Error creating top countries chart: {str(e)}")
-
 
         st.subheader("😞 Top 10 Unhappiest Countries")
         try:
-            top_10 = df.nsmallest(10, 'happiness')
+            bottom_10 = df[df['Year'] == df['Year'].max()].nsmallest(10, 'Ladder score')
             fig_bar = px.bar(
-                top_10,
-                x='country',
-                y='happiness',
-                color='happiness',
+                bottom_10,
+                x='Country name',
+                y='Ladder score',
+                color='Ladder score',
                 title="Top 10 Unhappiest Countries",
-                labels={"country": "Country", "happiness": "Happiness Score"}
+                labels={"Country name": "Country", "Ladder score": "Happiness Score"}
             )
             fig_bar.update_layout(xaxis_tickangle=-45)
             st.plotly_chart(fig_bar, use_container_width=True)
         except Exception as e:
-            st.error(f"Error creating top countries chart: {str(e)}")
+            st.error(f"Error creating bottom countries chart: {str(e)}")
 
         # Factors comparison with radar chart
         st.subheader("🔍 Happiness Factors Comparison")
@@ -290,10 +472,7 @@ def main():
         if selected_country:
             try:
                 # Get factor columns or use defaults
-                factors = selected_factor_cols if selected_factor_cols else [
-                    'gdp', 'social_support', 'life_expectancy', 
-                    'freedom_to_make_life_choices', 'generosity', 'corruption'
-                ]
+                factors = selected_factor_cols if selected_factor_cols else factor_cols[1:]  # Exclude Ladder score
                 
                 # Normalize factors for better comparison
                 max_values = df[factors].max()
@@ -301,7 +480,7 @@ def main():
                 fig_radar = go.Figure()
                 
                 for country in selected_country:
-                    country_data = df[df['country'] == country]
+                    country_data = df[df['Country name'] == country]
                     
                     if not country_data.empty:
                         # Normalize values for better visualization

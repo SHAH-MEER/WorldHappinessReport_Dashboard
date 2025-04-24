@@ -7,6 +7,7 @@ import seaborn as sns
 import numpy as np
 import os
 import traceback
+import json
 
 # Custom theme and styling
 st.set_page_config(
@@ -19,74 +20,110 @@ st.set_page_config(
 # Custom CSS
 st.markdown("""
     <style>
+    /* Common styles */
     .main {
         padding: 2rem;
     }
+    
+    /* Base styles */
+    :root {
+        --bg-color: #ffffff;
+        --text-color: #2c3e50;
+        --card-bg: #ffffff;
+        --card-border: #e0e0e0;
+        --hover-shadow: rgba(0,0,0,0.1);
+        --secondary-bg: #f8f9fa;
+        --metric-color: #34495e;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --danger-color: #e74c3c;
+        --info-color: #3498db;
+    }
+    
     .stTitle {
-        color: #2c3e50;
+        color: var(--text-color) !important;
         font-size: 3rem !important;
     }
+    
     .stSubheader {
-        color: #34495e;
+        color: var(--metric-color) !important;
         font-size: 1.5rem !important;
     }
-    .error-message {
-        color: #e74c3c;
-        padding: 1rem;
-        background-color: #fadbd8;
-        border-radius: 0.5rem;
-        margin: 1rem 0;
-    }
-    .info-message {
-        color: #2980b9;
-        padding: 1rem;
-        background-color: #d6eaf8;
-        border-radius: 0.5rem;
-        margin: 1rem 0;
-    }
-    .mapbox-token-warning {
-        display: none !important;
-    }
+    
     .content-card {
-        background-color: #ffffff;
+        background-color: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        color: var(--text-color) !important;
         padding: 1.5rem;
         border-radius: 0.75rem;
         margin: 1rem 0;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px var(--hover-shadow);
         transition: transform 0.2s ease-in-out;
     }
+    
     .content-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 8px var(--hover-shadow);
     }
+    
     .content-card h3, .content-card h4 {
-        color: #2c3e50;
+        color: var(--text-color) !important;
         margin-bottom: 1rem;
         font-size: 1.2rem;
         font-weight: 600;
     }
+    
     .content-card p {
-        color: #4a4a4a;
+        color: var(--text-color) !important;
         margin: 0.5rem 0;
         line-height: 1.5;
     }
-    .content-card ul {
-        margin: 0.5rem 0;
-        padding-left: 1.5rem;
-        list-style-type: none;
+    
+    .error-message {
+        color: var(--danger-color);
+        padding: 1rem;
+        background-color: var(--card-bg);
+        border: 1px solid var(--danger-color);
+        border-radius: 0.5rem;
+        margin: 1rem 0;
     }
-    .content-card li {
-        color: #4a4a4a;
-        margin: 0.5rem 0;
-        position: relative;
+    
+    .info-message {
+        color: var(--info-color);
+        padding: 1rem;
+        background-color: var(--card-bg);
+        border: 1px solid var(--info-color);
+        border-radius: 0.5rem;
+        margin: 1rem 0;
     }
-    .content-card li:before {
-        content: "•";
-        color: #3498db;
-        font-weight: bold;
-        position: absolute;
-        left: -1rem;
+    
+    .metric-row {
+        background-color: var(--secondary-bg);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin: 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .metric-label {
+        color: var(--text-color);
+        font-weight: 500;
+    }
+    
+    .metric-value {
+        color: var(--metric-color);
+        font-weight: 600;
+    }
+    
+    /* Style Streamlit native elements */
+    .stSelectbox label, .stSlider label {
+        color: var(--text-color) !important;
+    }
+    
+    .stMarkdown {
+        color: var(--text-color) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -150,6 +187,35 @@ def load_summary():
 def main():
     # Title and description with enhanced styling
     st.title("🌍 World Happiness Index")
+    
+    # Add comprehensive documentation
+    with st.expander("📚 About This Dashboard"):
+        st.markdown("""
+        ### World Happiness Dashboard Guide
+        
+        This interactive dashboard provides comprehensive insights into global happiness trends and factors affecting well-being across nations.
+        
+        #### Dashboard Sections:
+        1. **Global Overview**: Key metrics and trends
+        2. **Happiness Map**: Geographic distribution
+        3. **Factor Analysis**: Detailed breakdown of happiness components
+        4. **Country Rankings**: Top and bottom performers
+        
+        #### Data Sources:
+        - World Happiness Report data
+        - Annual country-level measurements
+        - Standardized happiness metrics
+        
+        #### Key Metrics Explained:
+        - **Ladder Score**: Overall happiness rating (0-10)
+        - **GDP per capita**: Economic output and living standards
+        - **Social Support**: Community and relationship strength
+        - **Life Expectancy**: Health and wellness indicators
+        - **Freedom**: Personal autonomy measures
+        - **Generosity**: Charitable and giving behaviors
+        - **Corruption**: Trust in institutions
+        """)
+    
     st.markdown("""
     <div class="content-card">
         <h3 style='margin-top: 0;'>Welcome to the World Happiness Analysis Dashboard</h3>
@@ -165,6 +231,38 @@ def main():
 
     # Global Metrics Dashboard
     st.subheader("🌐 Global Happiness Overview")
+    
+    with st.expander("📈 Understanding Global Metrics"):
+        st.markdown("""
+        ### Global Happiness Metrics Guide
+        
+        #### Key Indicators
+        1. **Global Happiness Score**
+           - Average happiness across all countries
+           - Year-over-year change indicator
+           - Trend analysis
+        
+        2. **Happiest Country**
+           - Current top performer
+           - Score comparison
+           - Historical context
+        
+        3. **Global Stability**
+           - Measures happiness score volatility
+           - Lower values indicate more stable scores
+           - Important for trend analysis
+        
+        #### How to Use These Metrics
+        - Monitor global trends
+        - Identify significant changes
+        - Compare regional performance
+        - Track stability over time
+        
+        #### Data Updates
+        - Annual data refreshes
+        - Rolling averages for stability
+        - Seasonal adjustments where applicable
+        """)
     
     # Create metrics with sparklines
     col1, col2, col3 = st.columns(3)
@@ -203,6 +301,28 @@ def main():
 
     # Happiness Highlights Section
     st.markdown("### 🎯 Happiness Highlights")
+    
+    with st.expander("🔍 Understanding Happiness Highlights"):
+        st.markdown("""
+        ### Happiness Highlights Guide
+        
+        #### Most Improved Countries
+        - Shows countries with largest positive changes
+        - Based on year-over-year improvement
+        - Considers multiple factors
+        
+        #### Quick Facts
+        - Total countries analyzed
+        - Data timespan
+        - Score distributions
+        - Regional patterns
+        
+        #### Analysis Tips
+        1. Look for regional patterns in improvements
+        2. Consider economic and social factors
+        3. Note stability of improvements
+        4. Compare with global averages
+        """)
     
     col1, col2 = st.columns([2, 1])
     
@@ -252,6 +372,40 @@ def main():
     # Interactive World Map
     st.markdown("### 🗺️ Global Happiness Distribution")
     
+    with st.expander("🌐 Map Navigation Guide"):
+        st.markdown("""
+        ### World Map Visualization Guide
+        
+        #### Map Features
+        1. **Color Coding**
+           - Darker colors = Higher happiness scores
+           - Lighter colors = Lower happiness scores
+           - Gray = No data available
+        
+        2. **Interaction Tools**
+           - Hover for detailed information
+           - Click and drag to pan
+           - Scroll to zoom
+           - Double-click to reset view
+        
+        3. **Data Display**
+           - Country name
+           - Happiness score
+           - GDP per capita
+           - Year-over-year change
+        
+        #### Analysis Tips
+        - Look for regional patterns
+        - Compare neighboring countries
+        - Note development correlations
+        - Track changes over time
+        
+        #### Technical Notes
+        - Data updates annually
+        - Some countries may lack data
+        - Scores normalized for comparison
+        """)
+    
     # Year selector for map
     selected_year = st.slider(
         "Select Year",
@@ -291,21 +445,11 @@ def main():
     
     st.plotly_chart(fig_map, use_container_width=True)
     
-    # Add map legend and instructions
-    with st.expander("🔍 Map Instructions"):
-        st.markdown("""
-        <div class="content-card">
-            <ul>
-                <li>Hover over countries to see detailed happiness metrics</li>
-                <li>Click and drag to pan across the map</li>
-                <li>Scroll to zoom in/out</li>
-                <li>Double-click to reset the view</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
 
     # Factor Analysis Section
     st.markdown("### 📊 Happiness Factors Analysis")
+    
+    
     
     # Get factor correlations
     factor_cols = ['Ladder score', 'Log GDP per capita', 
@@ -472,42 +616,60 @@ def main():
         if selected_country:
             try:
                 # Get factor columns or use defaults
-                factors = selected_factor_cols if selected_factor_cols else factor_cols[1:]  # Exclude Ladder score
+                factors = selected_factor_cols if selected_factor_cols else [col for col in factor_cols if col != 'Ladder score']
                 
                 # Normalize factors for better comparison
-                max_values = df[factors].max()
+                df_normalized = df.copy()
+                for factor in factors:
+                    df_normalized[factor] = (df[factor] - df[factor].min()) / (df[factor].max() - df[factor].min())
                 
                 fig_radar = go.Figure()
                 
                 for country in selected_country:
-                    country_data = df[df['Country name'] == country]
+                    country_data = df_normalized[df_normalized['Country name'] == country].iloc[-1]  # Get latest data
                     
                     if not country_data.empty:
-                        # Normalize values for better visualization
-                        normalized_values = (country_data[factors].values.flatten() / max_values).tolist()
+                        # Get normalized values for selected factors
+                        values = [country_data[factor] for factor in factors]
+                        # Add first value again to close the polygon
+                        values.append(values[0])
                         
-                        # Close the loop for radar chart
-                        values = normalized_values + [normalized_values[0]]
-                        labels = [f.replace('_', ' ').title() for f in factors]
+                        # Create labels with better formatting
+                        labels = [factor.replace('Log GDP per capita', 'GDP').replace('_', ' ').title() for factor in factors]
+                        labels.append(labels[0])  # Add first label again to close the polygon
                         
                         fig_radar.add_trace(go.Scatterpolar(
                             r=values,
-                            theta=labels + [labels[0]],
+                            theta=labels,
                             name=country,
                             fill='toself'
                         ))
                 
                 fig_radar.update_layout(
-                    polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-                    title="Normalized Factor Comparison"
+                    polar=dict(
+                        radialaxis=dict(
+                            visible=True,
+                            range=[0, 1]
+                        )
+                    ),
+                    showlegend=True,
+                    title="Normalized Factor Comparison",
+                    height=500
                 )
                 st.plotly_chart(fig_radar, use_container_width=True)
                 
                 # Add explanatory text
-                st.info("Note: Values are normalized relative to the maximum value across all countries to enable comparison.")
+                st.info("""
+                **How to read this chart:**
+                - Values are normalized (0-1 scale) for comparison
+                - Each axis represents a happiness factor
+                - Larger area indicates better overall performance
+                - Compare shapes to understand relative strengths
+                """)
                 
             except Exception as e:
                 st.error(f"Error creating radar chart: {str(e)}")
+                st.error(traceback.format_exc())
         else:
             st.info("Select countries to compare their happiness factors.")
 

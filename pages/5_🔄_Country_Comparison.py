@@ -98,6 +98,98 @@ def create_comparison_metrics(data1, data2, country1, country2, metrics):
 # Page config
 st.set_page_config(page_title="Country Comparison", page_icon="🔄", layout="wide")
 
+# Title and documentation
+st.title("🔄 Country Comparison")
+
+with st.expander("📚 About Country Comparison"):
+    st.markdown("""
+    ### Understanding Country Comparison Analysis
+    
+    This tool provides a detailed comparison between any two countries in the World Happiness Report, helping you understand their similarities, differences, and trends over time.
+    
+    #### Key Features:
+    1. **Similarity Score**
+       - Weighted comparison across multiple factors
+       - Score ranges from 0 (very different) to 1 (very similar)
+       - Visual indicators of similarity levels
+    
+    2. **Factor-by-Factor Analysis**
+       - Detailed comparison of each happiness factor
+       - Percentage differences and significance levels
+       - Visual representation of gaps
+    
+    3. **Trend Analysis**
+       - Historical comparison over time
+       - Convergence/divergence patterns
+       - Key turning points
+    
+    4. **Insights Generation**
+       - Automated analysis of major differences
+       - Context-aware comparisons
+       - Policy-relevant observations
+    """)
+
+with st.expander("🔍 How to Use This Tool"):
+    st.markdown("""
+    ### Guide to Country Comparison
+    
+    #### Step-by-Step Instructions:
+    1. **Select Countries**
+       - Choose two countries from the dropdown menus
+       - Consider selecting countries of interest or similar development levels
+    
+    2. **Read the Similarity Score**
+       - Look at the overall similarity percentage
+       - Note the descriptive text (e.g., "very similar", "quite different")
+       - Check the color coding for quick understanding
+    
+    3. **Analyze Factor Differences**
+       - Review each happiness factor comparison
+       - Pay attention to percentage differences
+       - Note factors marked as highly significant
+    
+    4. **Explore Trends**
+       - Check how relationships have evolved
+       - Look for patterns of convergence or divergence
+       - Identify significant changes over time
+    
+    #### Tips for Analysis:
+    - Focus on factors with the largest differences
+    - Consider cultural and regional context
+    - Look for unexpected similarities/differences
+    - Use trends to understand development patterns
+    """)
+
+with st.expander("📊 Understanding the Metrics"):
+    st.markdown("""
+    ### Metrics and Calculations Guide
+    
+    #### Similarity Score Calculation:
+    - Weighted Euclidean distance across factors
+    - Normalized to 0-1 scale
+    - Factors weighted by importance:
+        - Ladder Score: 100%
+        - GDP & Social Support: 80%
+        - Health & Freedom: 80%
+        - Generosity & Corruption: 30%
+    
+    #### Significance Levels:
+    - **High**: >20% difference
+    - **Medium**: 10-20% difference
+    - **Low**: <10% difference
+    
+    #### Color Coding:
+    - 🟢 Green: Very Similar (>0.9)
+    - 🟡 Yellow: Moderately Different (0.5-0.75)
+    - 🔴 Red: Very Different (<0.25)
+    
+    #### Data Considerations:
+    - Annual data updates
+    - Missing data handling
+    - Statistical significance tests
+    - Normalization methods
+    """)
+
 # Custom CSS
 st.markdown("""
     <style>
@@ -204,7 +296,6 @@ def load_data():
     return df
 
 # Main content
-st.title("🔄 Country Comparison Analysis")
 st.markdown("""
 Compare happiness metrics between countries, analyze differences, and explore contributing factors.
 """)

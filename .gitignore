@@ -51,11 +51,11 @@ ENV/
 *.txt
 
 # Keep specific data files
-!data/raw/happiness_by_country.csv
+!data/raw/output.csv
 !data/raw/happy.csv
 !data/processed/happiness_by_country_cleaned.csv
 !data/processed/latest_happiness_cleaned.csv
-!data/processed/output.csv
+!data/processed/happiness_by_country.csv
 !data/processed/happiness_summary_detailed.txt
 !requirements.txt
 

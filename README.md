@@ -61,12 +61,12 @@ WorldHappinessReport/
 │   └── 7_📊_Correlation_Analysis.py
 ├── data/                       # Data directory
 │   ├── raw/                    # Raw data files
-│   │   ├── happiness_by_country.csv
+│   │   ├── output.csv
 │   │   └── happy.csv
 │   └── processed/              # Processed data files
 │       ├── happiness_by_country_cleaned.csv
 │       ├── latest_happiness_cleaned.csv
-│       ├── output.csv
+│       ├── happiness_by_country.csv 
 │       └── happiness_summary_detailed.txt
 ├── process_data.py            # Data processing script
 ├── requirements.txt           # Project dependencies
@@ -124,12 +124,12 @@ The application uses data from the World Happiness Report, which includes:
 ## Dependencies 📦
 
 Main dependencies include:
-- streamlit>=1.24.0
-- plotly>=5.13.1
-- pandas>=1.5.3
-- numpy>=1.24.3
-- scikit-learn>=1.2.2
-- seaborn>=0.12.2
+- streamlit
+- plotly
+- pandas
+- numpy
+- scikit-learn
+- seaborn
 
 For a complete list, see `requirements.txt`.
 

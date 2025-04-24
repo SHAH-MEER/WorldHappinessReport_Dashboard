@@ -10,6 +10,92 @@ from sklearn.decomposition import PCA
 # Page config
 st.set_page_config(page_title="Happiness Clusters", page_icon="🔍", layout="wide")
 
+# Title and documentation
+st.title("🔍 Happiness Cluster Analysis")
+
+with st.expander("📚 About Cluster Analysis"):
+    st.markdown("""
+    ### Understanding Happiness Clusters
+    
+    This analysis uses machine learning (K-means clustering) to identify groups of countries with similar happiness characteristics, helping uncover patterns and relationships in global happiness data.
+    
+    #### Key Features:
+    1. **Dynamic Clustering**
+       - Adjustable number of clusters (2-8)
+       - Flexible feature selection
+       - Real-time visualization updates
+    
+    2. **Interactive Visualizations**
+       - PCA-based 2D cluster plot
+       - Radar charts for cluster profiles
+       - Heatmap of cluster characteristics
+    
+    3. **Detailed Analysis**
+       - Cluster statistics and summaries
+       - Key distinguishing features
+       - Country grouping patterns
+    
+    4. **Statistical Insights**
+       - Cluster stability metrics
+       - Feature importance analysis
+       - Inter-cluster relationships
+    """)
+
+with st.expander("🔍 How to Use This Tool"):
+    st.markdown("""
+    ### Guide to Cluster Analysis
+    
+    #### Step-by-Step Instructions:
+    1. **Configure Parameters**
+       - Select analysis year
+       - Choose number of clusters (2-8)
+       - Pick features for clustering
+    
+    2. **Interpret Visualizations**
+       - PCA Plot: Shows country groupings
+       - Radar Chart: Displays cluster characteristics
+       - Heatmap: Reveals feature patterns
+    
+    3. **Analyze Results**
+       - Review cluster profiles
+       - Examine country groupings
+       - Identify distinguishing features
+    
+    #### Analysis Tips:
+    - Start with fewer clusters (3-4) for clear patterns
+    - Include diverse features for robust clustering
+    - Look for geographical or economic patterns
+    - Consider cultural and regional contexts
+    """)
+
+with st.expander("📊 Understanding the Methods"):
+    st.markdown("""
+    ### Technical Methodology
+    
+    #### Clustering Algorithm
+    - **K-means Clustering**
+      - Iterative centroid-based clustering
+      - Minimizes within-cluster variance
+      - Optimal for discovering natural groupings
+    
+    #### Data Processing
+    1. **Feature Scaling**
+       - StandardScaler for normalization
+       - Mean = 0, Standard deviation = 1
+       - Ensures fair feature comparison
+    
+    2. **Dimensionality Reduction**
+       - PCA for visualization
+       - 2D projection of high-dimensional data
+       - Preserves major variance patterns
+    
+    #### Interpretation Guide:
+    - **Cluster Size**: Number of countries in each group
+    - **Centroids**: Average characteristics of clusters
+    - **Distance**: Similarity between countries/clusters
+    - **Feature Importance**: Key distinguishing factors
+    """)
+
 # Custom CSS
 st.markdown("""
     <style>
@@ -57,7 +143,6 @@ def load_data():
     return df
 
 # Main content
-st.title("🔍 Happiness Cluster Analysis")
 st.markdown("""
 Discover patterns and groups of countries with similar happiness characteristics using machine learning clustering techniques.
 """)

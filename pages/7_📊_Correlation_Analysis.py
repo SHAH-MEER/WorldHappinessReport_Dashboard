@@ -14,22 +14,30 @@ st.set_page_config(page_title="Correlation Analysis", page_icon="📊", layout="
 # Custom CSS
 st.markdown("""
     <style>
-    .main {
-        padding: 2rem;
+    :root {
+        --bg-color: #ffffff;
+        --text-color: #2c3e50;
+        --card-bg: #ffffff;
+        --card-border: #e0e0e0;
+        --hover-shadow: rgba(0,0,0,0.1);
+        --secondary-bg: #f8f9fa;
+        --strong-color: #27ae60;
+        --moderate-color: #f39c12;
+        --weak-color: #e74c3c;
+        --strong-bg: #e8f5e9;
+        --moderate-bg: #fef6e7;
+        --weak-bg: #fde8e7;
     }
-    .stTitle {
-        color: #2c3e50;
-        font-size: 2.5rem !important;
-        margin-bottom: 2rem !important;
-    }
+    
     .correlation-card {
-        background-color: #ffffff;
+        background-color: var(--card-bg);
         padding: 1.5rem;
         border-radius: 0.75rem;
         margin: 1rem 0;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        border: 1px solid var(--card-border);
+        box-shadow: 0 4px 6px var(--hover-shadow);
     }
+    
     .metric-row {
         display: flex;
         justify-content: space-between;
@@ -37,50 +45,57 @@ st.markdown("""
         margin: 0.75rem 0;
         padding: 0.75rem;
         border-radius: 0.5rem;
-        background-color: #f8f9fa;
+        background-color: var(--secondary-bg);
     }
+    
     .metric-label {
-        color: #2c3e50;
+        color: var(--text-color);
         font-weight: 600;
         font-size: 1.1rem;
     }
+    
     .metric-value {
         font-weight: 600;
         color: #2c3e50;
     }
+    
     .insight-box {
-        background-color: #ffffff;
+        background-color: var(--card-bg);
         padding: 1rem;
         border-radius: 0.5rem;
         margin: 0.5rem 0;
-        border: 1px solid #e0e0e0;
+        border: 1px solid var(--card-border);
     }
+    
     .correlation-strong {
-        color: #1a8d48;
+        color: var(--strong-color);
         font-weight: 700;
         font-size: 1.1rem;
         padding: 0.25rem 0.75rem;
-        background-color: #e8f5e9;
+        background-color: var(--strong-bg);
         border-radius: 0.25rem;
     }
+    
     .correlation-moderate {
-        color: #b7791f;
+        color: var(--moderate-color);
         font-weight: 700;
         font-size: 1.1rem;
         padding: 0.25rem 0.75rem;
-        background-color: #fef6e7;
+        background-color: var(--moderate-bg);
         border-radius: 0.25rem;
     }
+    
     .correlation-weak {
-        color: #c0392b;
+        color: var(--weak-color);
         font-weight: 700;
         font-size: 1.1rem;
         padding: 0.25rem 0.75rem;
-        background-color: #fde8e7;
+        background-color: var(--weak-bg);
         border-radius: 0.25rem;
     }
+    
     .p-value-text {
-        color: #2c3e50;
+        color: var(--text-color);
         font-size: 0.9rem;
         font-weight: 500;
     }
@@ -124,6 +139,39 @@ def create_correlation_network(corr_matrix, threshold=0.3):
 
 # Main content
 st.title("📊 Correlation Analysis")
+
+# Add comprehensive documentation
+with st.expander("📚 About This Analysis"):
+    st.markdown("""
+    ### Understanding Correlation Analysis
+    
+    This page provides a comprehensive analysis of relationships between different happiness factors. The analysis helps understand how various factors influence and interact with each other in contributing to overall happiness scores.
+    
+    #### Key Features:
+    - Interactive correlation heatmap
+    - Detailed factor-by-factor analysis
+    - Network visualization of relationships
+    - Statistical significance testing
+    - Multiple correlation methods
+    
+    #### Available Tools:
+    1. **Correlation Matrix**: Visual representation of all factor relationships
+    2. **Detailed Analysis**: Deep dive into specific factor relationships
+    3. **Factor Relationships**: Network graph showing significant connections
+    
+    #### Methodology:
+    - **Pearson Correlation**: Measures linear relationships between variables
+    - **Spearman Correlation**: Measures monotonic relationships (rank-based)
+    - **P-value Analysis**: Tests statistical significance of correlations
+    - **Network Analysis**: Visualizes relationships above significance threshold
+    
+    #### Interpretation Guide:
+    - **Strong Correlation**: |r| > 0.7
+    - **Moderate Correlation**: 0.4 < |r| < 0.7
+    - **Weak Correlation**: |r| < 0.4
+    - **P-value**: Lower values indicate higher statistical significance
+    """)
+
 st.markdown("""
 Explore relationships between different happiness factors and understand their interdependencies.
 """)
@@ -140,6 +188,26 @@ df = load_data()
 # Sidebar controls
 with st.sidebar:
     st.header("Analysis Controls")
+    
+    with st.expander("ℹ️ Control Panel Guide"):
+        st.markdown("""
+        ### How to Use Controls
+        
+        #### Year Selection
+        - Choose specific year for analysis
+        - More recent years have more complete data
+        - Compare different years to see trends
+        
+        #### Correlation Method
+        - **Pearson**: Best for linear relationships
+        - **Spearman**: Better for non-linear relationships
+        - Choose based on your data assumptions
+        
+        #### Significance Level
+        - Standard levels: 0.01, 0.05, 0.10
+        - Lower values = more stringent criteria
+        - 0.05 is commonly used in research
+        """)
     
     # Year selection
     selected_year = st.selectbox(
@@ -197,6 +265,27 @@ else:
 tab1, tab2, tab3 = st.tabs(["Correlation Matrix", "Detailed Analysis", "Factor Relationships"])
 
 with tab1:
+    with st.expander("📊 Understanding the Correlation Matrix"):
+        st.markdown("""
+        ### How to Read the Correlation Matrix
+        
+        #### Heatmap Interpretation
+        - **Colors**: Blue = positive correlation, Red = negative correlation
+        - **Intensity**: Darker colors indicate stronger relationships
+        - **Values**: Range from -1 (perfect negative) to +1 (perfect positive)
+        
+        #### Key Features
+        1. **Diagonal**: Always 1.0 (perfect correlation with itself)
+        2. **Symmetry**: Matrix is symmetrical across diagonal
+        3. **Significance**: Marked correlations pass statistical testing
+        
+        #### Tips for Analysis
+        - Look for dark colors to identify strong relationships
+        - Check p-values for statistical significance
+        - Consider both positive and negative correlations
+        - Focus on relationships relevant to your research
+        """)
+    
     st.subheader("Correlation Heatmap")
     
     # Create correlation heatmap
@@ -209,15 +298,19 @@ with tab1:
         zmax=1,
         text=np.round(corr_matrix, 2),
         texttemplate='%{text}',
-        textfont={"size": 10},
+        textfont={"size": 10, "color": "#ffffff"},
         hoverongaps=False
     ))
     
+    # Update layout for theme
     fig.update_layout(
         title=f"{correlation_method} Correlation Matrix ({selected_year})",
         height=600,
         width=800,
-        xaxis_tickangle=-45
+        xaxis_tickangle=-45,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='#ffffff')
     )
     
     st.plotly_chart(fig, use_container_width=True)
@@ -256,6 +349,27 @@ with tab1:
         st.info("No significant correlations found at the selected significance level.")
 
 with tab2:
+    with st.expander("🔍 Guide to Detailed Analysis"):
+        st.markdown("""
+        ### Factor-by-Factor Analysis Guide
+        
+        #### Scatter Plot Interpretation
+        - **Points**: Each represents a country
+        - **Trend Line**: Shows overall relationship
+        - **Slope**: Indicates relationship strength
+        
+        #### Analysis Features
+        1. **Primary Factor Selection**: Choose main factor to analyze
+        2. **Multiple Comparisons**: See relationships with all other factors
+        3. **Statistical Summary**: Correlation values and significance
+        
+        #### How to Use
+        1. Select primary factor of interest
+        2. Examine scatter plots for patterns
+        3. Check correlation summaries
+        4. Look for outliers and trends
+        """)
+    
     st.subheader("Factor-by-Factor Analysis")
     
     # Select primary factor
@@ -306,6 +420,28 @@ with tab2:
         """, unsafe_allow_html=True)
 
 with tab3:
+    with st.expander("🕸️ Network Visualization Guide"):
+        st.markdown("""
+        ### Understanding the Network Graph
+        
+        #### Visual Elements
+        - **Nodes**: Represent happiness factors
+        - **Edges**: Show significant correlations
+        - **Edge Labels**: Display correlation strength
+        - **Layout**: Circular for clear visualization
+        
+        #### Network Properties
+        1. **Connection Strength**: Shown by edge labels
+        2. **Significance**: Only significant correlations shown
+        3. **Centrality**: Factors with many connections are central
+        
+        #### Analysis Tips
+        - Look for clusters of connected factors
+        - Identify central/influential factors
+        - Consider indirect relationships
+        - Focus on strongest connections
+        """)
+    
     st.subheader("Factor Relationships")
     
     # Create network graph of correlations

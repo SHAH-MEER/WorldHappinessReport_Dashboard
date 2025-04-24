@@ -91,11 +91,11 @@ def load_data() -> Optional[pd.DataFrame]:
         Optional[pd.DataFrame]: DataFrame containing happiness data or None if error occurs
     """
     try:
-        if not os.path.exists("happy.csv"):
+        if not os.path.exists("data/raw/happy.csv"):
             display_error("Data file 'happy.csv' not found. Please ensure the file exists in the application directory.")
             return None
         
-        df = pd.read_csv("happy.csv")
+        df = pd.read_csv("data/raw/happy.csv")
         
         # Validate required columns exist
         features = ['gdp', 'social_support', 'life_expectancy', 
